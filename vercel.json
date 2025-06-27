@@ -1,4 +1,10 @@
 {
+  "version": 2,
   "buildCommand": "pnpm run build",
-  "outputDirectory": "dist"
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "ignoreCommand": "exit 1", 
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
