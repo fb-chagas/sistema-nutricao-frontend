@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulários Modais - Sistema de Nutrição</title>
+    <style>
+        /* Estilos para modais */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background-color: #1f2937;
+            color: white;
+            padding: 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+            color: white;
+        }
+
+        .close:hover {
+            color: #ff6b6b;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        .btn-secondary {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success-message {
+            color: #10b981;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Modal para Nova NFe -->
+<div id="modalNovaNfe" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📄 Nova Nota Fiscal</h2>
+            <button class="close" onclick="closeModal('modalNovaNfe')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formNovaNfe">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nfe_numero">Número da NFe <span class="required">*</span></label>
+                        <input type="text" id="nfe_numero" name="numero" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nfe_serie">Série</label>
+                        <input type="text" id="nfe_serie" name="serie">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nfe_fornecedor">Fornecedor <span class="required">*</span></label>
+                        <select id="nfe_fornecedor" name="fornecedor_id" required>
+                            <option value="">Selecione um fornecedor</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="nfe_data_emissao">Data de Emissão <span class="required">*</span></label>
+                        <input type="date" id="nfe_data_emissao" name="data_emissao" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nfe_valor_total">Valor Total <span class="required">*</span></label>
+                        <input type="number" id="nfe_valor_total" name="valor_total" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nfe_data_vencimento">Data de Vencimento</label>
+                        <input type="date" id="nfe_data_vencimento" name="data_vencimento">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="nfe_observacoes">Observações</label>
+                    <textarea id="nfe_observacoes" name="observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalNovaNfe')">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="salvarNfe()">
+                <span id="loadingNfe" class="loading" style="display: none;"></span>
+                Salvar NFe
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Novo Fornecedor -->
+<div id="modalNovoFornecedor" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>🏢 Novo Fornecedor</h2>
+            <button class="close" onclick="closeModal('modalNovoFornecedor')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formNovoFornecedor">
+                <div class="form-group">
+                    <label for="fornecedor_nome">Nome/Razão Social <span class="required">*</span></label>
+                    <input type="text" id="fornecedor_nome" name="nome" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fornecedor_cnpj">CNPJ <span class="required">*</span></label>
+                        <input type="text" id="fornecedor_cnpj" name="cnpj" required placeholder="00.000.000/0000-00">
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor_ie">Inscrição Estadual</label>
+                        <input type="text" id="fornecedor_ie" name="inscricao_estadual">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fornecedor_telefone">Telefone</label>
+                        <input type="tel" id="fornecedor_telefone" name="telefone" placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor_email">E-mail</label>
+                        <input type="email" id="fornecedor_email" name="email" placeholder="contato@fornecedor.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fornecedor_endereco">Endereço</label>
+                    <input type="text" id="fornecedor_endereco" name="endereco" placeholder="Rua, número, bairro">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fornecedor_cidade">Cidade</label>
+                        <input type="text" id="fornecedor_cidade" name="cidade">
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor_uf">UF</label>
+                        <select id="fornecedor_uf" name="uf">
+                            <option value="">Selecione</option>
+                            <option value="AC">AC</option>
+                            <option value="AL">AL</option>
+                            <option value="AP">AP</option>
+                            <option value="AM">AM</option>
+                            <option value="BA">BA</option>
+                            <option value="CE">CE</option>
+                            <option value="DF">DF</option>
+                            <option value="ES">ES</option>
+                            <option value="GO">GO</option>
+                            <option value="MA">MA</option>
+                            <option value="MT">MT</option>
+                            <option value="MS">MS</option>
+                            <option value="MG">MG</option>
+                            <option value="PA">PA</option>
+                            <option value="PB">PB</option>
+                            <option value="PR">PR</option>
+                            <option value="PE">PE</option>
+                            <option value="PI">PI</option>
+                            <option value="RJ">RJ</option>
+                            <option value="RN">RN</option>
+                            <option value="RS">RS</option>
+                            <option value="RO">RO</option>
+                            <option value="RR">RR</option>
+                            <option value="SC">SC</option>
+                            <option value="SP">SP</option>
+                            <option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fornecedor_cep">CEP</label>
+                        <input type="text" id="fornecedor_cep" name="cep" placeholder="00000-000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="fornecedor_observacoes">Observações</label>
+                    <textarea id="fornecedor_observacoes" name="observacoes" rows="3" placeholder="Informações adicionais..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalNovoFornecedor')">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="salvarFornecedor()">
+                <span id="loadingFornecedor" class="loading" style="display: none;"></span>
+                Salvar Fornecedor
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Novo Insumo -->
+<div id="modalNovoInsumo" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📦 Novo Insumo</h2>
+            <button class="close" onclick="closeModal('modalNovoInsumo')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formNovoInsumo">
+                <div class="form-group">
+                    <label for="insumo_nome">Nome do Insumo <span class="required">*</span></label>
+                    <input type="text" id="insumo_nome" name="nome" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="insumo_categoria">Categoria <span class="required">*</span></label>
+                        <select id="insumo_categoria" name="categoria" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="carnes">Carnes</option>
+                            <option value="vegetais">Vegetais</option>
+                            <option value="frutas">Frutas</option>
+                            <option value="laticinios">Laticínios</option>
+                            <option value="graos">Grãos e Cereais</option>
+                            <option value="temperos">Temperos</option>
+                            <option value="bebidas">Bebidas</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="insumo_unidade">Unidade de Medida <span class="required">*</span></label>
+                        <select id="insumo_unidade" name="unidade_medida" required>
+                            <option value="">Selecione</option>
+                            <option value="kg">Quilograma (kg)</option>
+                            <option value="g">Grama (g)</option>
+                            <option value="l">Litro (l)</option>
+                            <option value="ml">Mililitro (ml)</option>
+                            <option value="un">Unidade (un)</option>
+                            <option value="cx">Caixa (cx)</option>
+                            <option value="pc">Pacote (pc)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="insumo_preco_unitario">Preço Unitário</label>
+                        <input type="number" id="insumo_preco_unitario" name="preco_unitario" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="insumo_estoque_minimo">Estoque Mínimo</label>
+                        <input type="number" id="insumo_estoque_minimo" name="estoque_minimo" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="insumo_fornecedor_preferencial">Fornecedor Preferencial</label>
+                    <select id="insumo_fornecedor_preferencial" name="fornecedor_preferencial_id">
+                        <option value="">Selecione um fornecedor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="insumo_observacoes">Observações</label>
+                    <textarea id="insumo_observacoes" name="observacoes" rows="3" placeholder="Informações adicionais sobre o insumo..."></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modalNovoInsumo')">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="salvarInsumo()">
+                <span id="loadingInsumo" class="loading" style="display: none;"></span>
+                Salvar Insumo
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funções para controle dos modais
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Carregar dados necessários
+        if (modalId === 'modalNovaNfe' || modalId === 'modalNovoInsumo') {
+            carregarFornecedores();
+        }
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Limpar formulário
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+// Fechar modal clicando fora dele
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+}
+
+// Carregar lista de fornecedores para os selects
+async function carregarFornecedores() {
+    try {
+        const result = await ApiService.fornecedores.getAll();
+        if (result.success && result.data) {
+            const selectNfe = document.getElementById('nfe_fornecedor');
+            const selectInsumo = document.getElementById('insumo_fornecedor_preferencial');
+            
+            // Limpar opções existentes (exceto a primeira)
+            [selectNfe, selectInsumo].forEach(select => {
+                if (select) {
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild);
+                    }
+                }
+            });
+            
+            // Adicionar fornecedores
+            result.data.forEach(fornecedor => {
+                [selectNfe, selectInsumo].forEach(select => {
+                    if (select) {
+                        const option = document.createElement('option');
+                        option.value = fornecedor.id;
+                        option.textContent = fornecedor.nome;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Erro ao carregar fornecedores:', error);
+    }
+}
+
+// Funções para salvar dados
+async function salvarNfe() {
+    const form = document.getElementById('formNovaNfe');
+    const loadingElement = document.getElementById('loadingNfe');
+    const button = event.target;
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Mostrar loading
+    loadingElement.style.display = 'inline-block';
+    button.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const nfeData = Object.fromEntries(formData.entries());
+        
+        const result = await ApiService.nfe.create(nfeData);
+        
+        if (result.success) {
+            showNotification('NFe cadastrada com sucesso!', 'success');
+            closeModal('modalNovaNfe');
+            // Recarregar lista de NFes se estiver na página
+            if (typeof recarregarNfes === 'function') {
+                recarregarNfes();
+            }
+        } else {
+            showNotification('Erro ao cadastrar NFe: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Erro ao cadastrar NFe: ' + error.message, 'error');
+    } finally {
+        loadingElement.style.display = 'none';
+        button.disabled = false;
+    }
+}
+
+async function salvarFornecedor() {
+    const form = document.getElementById('formNovoFornecedor');
+    const loadingElement = document.getElementById('loadingFornecedor');
+    const button = event.target;
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Mostrar loading
+    loadingElement.style.display = 'inline-block';
+    button.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const fornecedorData = Object.fromEntries(formData.entries());
+        
+        const result = await ApiService.fornecedores.create(fornecedorData);
+        
+        if (result.success) {
+            showNotification('Fornecedor cadastrado com sucesso!', 'success');
+            closeModal('modalNovoFornecedor');
+            // Recarregar lista de fornecedores se estiver na página
+            if (typeof recarregarFornecedores === 'function') {
+                recarregarFornecedores();
+            }
+        } else {
+            showNotification('Erro ao cadastrar fornecedor: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Erro ao cadastrar fornecedor: ' + error.message, 'error');
+    } finally {
+        loadingElement.style.display = 'none';
+        button.disabled = false;
+    }
+}
+
+async function salvarInsumo() {
+    const form = document.getElementById('formNovoInsumo');
+    const loadingElement = document.getElementById('loadingInsumo');
+    const button = event.target;
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Mostrar loading
+    loadingElement.style.display = 'inline-block';
+    button.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const insumoData = Object.fromEntries(formData.entries());
+        
+        const result = await ApiService.insumos.create(insumoData);
+        
+        if (result.success) {
+            showNotification('Insumo cadastrado com sucesso!', 'success');
+            closeModal('modalNovoInsumo');
+            // Recarregar lista de insumos se estiver na página
+            if (typeof recarregarInsumos === 'function') {
+                recarregarInsumos();
+            }
+        } else {
+            showNotification('Erro ao cadastrar insumo: ' + result.error, 'error');
+        }
+    } catch (error) {
+        showNotification('Erro ao cadastrar insumo: ' + error.message, 'error');
+    } finally {
+        loadingElement.style.display = 'none';
+        button.disabled = false;
+    }
+}
+
+// Máscaras para campos
+document.addEventListener('DOMContentLoaded', function() {
+    // Máscara para CNPJ
+    const cnpjInput = document.getElementById('fornecedor_cnpj');
+    if (cnpjInput) {
+        cnpjInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+            value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+            value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+            value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+    
+    // Máscara para telefone
+    const telefoneInput = document.getElementById('fornecedor_telefone');
+    if (telefoneInput) {
+        telefoneInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+    
+    // Máscara para CEP
+    const cepInput = document.getElementById('fornecedor_cep');
+    if (cepInput) {
+        cepInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.replace(/^(\d{5})(\d)/, '$1-$2');
+            e.target.value = value;
+        });
+    }
+});
+</script>
+
+</body>
+</html>
+

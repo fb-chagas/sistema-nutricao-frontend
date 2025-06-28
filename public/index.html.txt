@@ -1,13 +1,18 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistema Nutrição FSG</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!-- Scripts do Sistema Operacional -->
+<script type="module" src="/src/services/api-service.js"></script>
+<script type="module" src="/src/scripts/integracao-frontend.js"></script>
+<!-- Carregamento dos Modais -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+ // Carrega os modais automaticamente
+ fetch('/modals/formularios-modais.html')
+ .then(response => response.text())
+ .then(html => {
+ const div = document.createElement('div');
+ div.innerHTML = html;
+ document.body.appendChild(d})
+ .catch(error => console.log('Modais carregados via script de
+integração'));
+});
+</script>
+</body>
